@@ -57,15 +57,15 @@ def add_safe_features(df: pd.DataFrame) -> pd.DataFrame:
     for w in (3, 6, 12):
         df[f"ship_roll_mean_{w}"] = (
             df.groupby("product_id", sort=False)["ship_lag1"]
-              .rolling(w, min_periods=1)
-              .mean()
-              .reset_index(level=0, drop=True)
+            .rolling(w, min_periods=1)
+            .mean()
+            .reset_index(level=0, drop=True)
         )
         df[f"customers_roll_mean_{w}"] = (
             df.groupby("product_id", sort=False)["customers_lag1"]
-              .rolling(w, min_periods=1)
-              .mean()
-              .reset_index(level=0, drop=True)
+            .rolling(w, min_periods=1)
+            .mean()
+            .reset_index(level=0, drop=True)
         )
 
     # Calendar seasonality
@@ -102,12 +102,23 @@ def main() -> None:
 
     feature_cols = [
         "ordered_lag1",
-        "ordered_roll_mean_3", "ordered_roll_mean_6", "ordered_roll_mean_12",
-        "ordered_roll_std_3",  "ordered_roll_std_6",  "ordered_roll_std_12",
-        "ship_lag1", "ship_roll_mean_3", "ship_roll_mean_6", "ship_roll_mean_12",
-        "customers_lag1", "customers_roll_mean_3", "customers_roll_mean_6", "customers_roll_mean_12",
+        "ordered_roll_mean_3",
+        "ordered_roll_mean_6",
+        "ordered_roll_mean_12",
+        "ordered_roll_std_3",
+        "ordered_roll_std_6",
+        "ordered_roll_std_12",
+        "ship_lag1",
+        "ship_roll_mean_3",
+        "ship_roll_mean_6",
+        "ship_roll_mean_12",
+        "customers_lag1",
+        "customers_roll_mean_3",
+        "customers_roll_mean_6",
+        "customers_roll_mean_12",
         "lines_lag1",
-        "sin_moy", "cos_moy",
+        "sin_moy",
+        "cos_moy",
     ]
 
     X_train = train_df[feature_cols].to_numpy(dtype=float)
@@ -119,6 +130,7 @@ def main() -> None:
     model_name = None
     try:
         from sklearn.ensemble import HistGradientBoostingRegressor
+
         model = HistGradientBoostingRegressor(
             loss="poisson",
             learning_rate=0.08,
@@ -130,6 +142,7 @@ def main() -> None:
         model_name = "HistGradientBoostingRegressor(loss='poisson')"
     except Exception:
         from sklearn.ensemble import GradientBoostingRegressor
+
         model = GradientBoostingRegressor(random_state=42)
         model.fit(X_train, y_train)
         model_name = "GradientBoostingRegressor"
@@ -141,28 +154,30 @@ def main() -> None:
     pred = pred.rename(columns={y_col: "y_true"})
     pred["y_pred"] = y_pred
     pred_out = outdir / "predictions_test.csv"
-    pred.to_csv(pred_out, index=False)
+    pred.to_csv(pred_out, index=False, float_format="%.3f")
 
     # Metrics by month
     rows = []
     for m, sub in pred.groupby("month"):
         yt = sub["y_true"].to_numpy(float)
         yp = sub["y_pred"].to_numpy(float)
-        rows.append({
-            "month": m,
-            "n_rows": int(len(sub)),
-            "actual_total": float(yt.sum()),
-            "pred_total": float(yp.sum()),
-            "mae": float(mean_absolute_error(yt, yp)),
-            "rmse": rmse(yt, yp),
-            "smape": smape(yt, yp),
-            "wape": wape(yt, yp),
-            "bias_ratio": bias_ratio(yt, yp),
-        })
+        rows.append(
+            {
+                "month": m,
+                "n_rows": int(len(sub)),
+                "actual_total": float(yt.sum()),
+                "pred_total": float(yp.sum()),
+                "mae": float(mean_absolute_error(yt, yp)),
+                "rmse": rmse(yt, yp),
+                "smape": smape(yt, yp),
+                "wape": wape(yt, yp),
+                "bias_ratio": bias_ratio(yt, yp),
+            }
+        )
 
     metrics_by_month = pd.DataFrame(rows).sort_values("month").reset_index(drop=True)
     mbm_out = outdir / "metrics_by_month.csv"
-    metrics_by_month.to_csv(mbm_out, index=False)
+    metrics_by_month.to_csv(mbm_out, index=False, float_format="%.3f")
 
     # Overall metrics
     overall = {
