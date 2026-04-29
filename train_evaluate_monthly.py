@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import pickle
 from pathlib import Path
 
 import numpy as np
@@ -148,6 +149,12 @@ def main() -> None:
         model_name = "GradientBoostingRegressor"
 
     y_pred = np.maximum(model.predict(X_test), 0.0)
+
+    # Save model as .pkl (Pickle)
+    model_out = outdir / "model.pkl"
+    with open(model_out, "wb") as f:
+        pickle.dump(model, f)
+    print(f"\n✅ Model saved to: {model_out.absolute()}")
 
     # Predictions file
     pred = test_df[["month", "product_id", y_col]].copy()
