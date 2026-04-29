@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+venv*/
+.venv/
+env/
+.env/
+
+# Data & Outputs
+output/
+charts/
+*.csv
+*.xlsx
+*.gz
+data/
+!data/.gitkeep
+
+# Models
+models/*.pkl
+models/*.joblib
+!models/.gitkeep
+
+# Backups
+backup_*/
+python_files.txt
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
