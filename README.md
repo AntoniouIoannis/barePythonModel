@@ -180,7 +180,7 @@ pip install -r requirements.txt --upgrade
 
 ## 📝 Notes
 
-- **Python Version:** 3.10.11 (recommended)
+- **Python Version:** 3.12.11 (recommended)
 - **Numeric Format:** Όλα τα outputs έχουν 3 δεκαδικά (`.3f`)
 - **Leakage Control:** Rolling features χρησιμοποιούν lag1 (no future data)
 - **Train/Test:** Chronological split (default: train έως 2019-04, test από 2019-05)
